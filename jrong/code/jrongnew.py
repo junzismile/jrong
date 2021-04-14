@@ -113,6 +113,8 @@ class Application_ui(Frame):
     def stopsend(self):
         print('stop')
         #global stopFlag
+        if glob.stopFlag == 1:
+            return 
         glob.stopFlag = 1
         #global  linenum
         glob.linenum = glob.linenum + glob.linecount + 1
