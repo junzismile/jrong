@@ -37,6 +37,9 @@ class Application_ui(Frame):
         self.master.geometry('%dx%d+%d+%d' % (800, 600, (screenwidth - 800) / 2, (screenheight - 600) / 2 - 100))
         self.createWidgets()
 
+        if glob.threadnum > 1:
+            self.datalines = self.thread_getdatalist()
+
     def createWidgets(self):
         self.top = self.winfo_toplevel()
         self.style = Style()
@@ -126,14 +129,10 @@ class Application_ui(Frame):
             glob.linenum = glob.linenum + glob.linecount + 1
             print('linenum = %s' % (glob.linenum))
         else:
-            if glob.FFlag == 1:
-                return
-
-            glob.FFlag = 0
             for i in range(glob.threadnum):
-                linenum = glob.get_value("thread_%d_linenum" % i)
+                linenum = glob.get_value("thread_%d_linestart" % i)
                 linecount = glob.get_value("thread_%d_linecount" % i)
-                glob.set("thread_%d_linenum" % i, (linenum + linecount + 1))
+                glob.set("thread_%d_linestart" % i, (linenum + linecount + 1))
 
     def changeUrl(self):
         url = self.URL
@@ -186,6 +185,7 @@ class Application_ui(Frame):
         func.setset(self.URL, self.dataPathVar, self.picpathVar)
 
     def thread_getdatalist(self):
+        print("thread_getdatalist")
         datalist = list()
 
         datalines = func.getBankInfo(self.dataPathVar)
@@ -199,7 +199,7 @@ class Application_ui(Frame):
 
         if (glob.threadnum > 1):
             for i in range(glob.threadnum):
-                linenumname = "thread_%d_linenum" % i
+                linenumname = "thread_%d_linestart" % i
 
                 startline = glob.get_value(linenumname)
                 endline = startline + lineblock - 1
@@ -210,7 +210,7 @@ class Application_ui(Frame):
                 linenumname = "thread_%d_lineend" % i
                 glob.set(linenumname, endline)
 
-                linenumname = "thread_%d_linenum" % (i + 1)
+                linenumname = "thread_%d_linestart" % (i + 1)
                 glob.set(linenumname, endline + 1)
 
                 print("startline = %d" % startline)
@@ -219,72 +219,35 @@ class Application_ui(Frame):
                 data = datalines[int(startline):int(endline + 1)]
                 datalist.append(data)
 
-
-
-        return datalist
-
+        return  datalines
 
     def sendBankInfo(self):
         print('sendBankInfo')
         start = time.time()
-        datalist = []
 
-        glob.stopFlag = 0
-
-        f_file = file("./out.txt", "a+")
-        datalines = func.getBankInfo(self.dataPathVar)
-        print(datalines)
-
-        linelen = len(datalines)
-        lineblock = linelen / glob.threadnum
-        #threads = list()
-
-        print('glob.threadnum = %d' % glob.threadnum)
-        print('linelen = %d' % linelen)
-        print('lineblock = %d' % lineblock)
+        #glob.stopFlag = 0
+        f_file = file("./out.txt", "a+", encoding=glob.encode)
         picpath = self.picpathVar.get()
 
         if (glob.threadnum > 1):
             threadLock = threading.Lock()
 
             for i in range(glob.threadnum):
-                #print('==================================')
-                if (glob.FFlag == 1):
-                    linenumname = "thread_%d_linenum" % i
+                print("i = "+ str(i))
+                startline = glob.get_value("thread_%d_linestart" % i)
+                endline = glob.get_value("thread_%d_lineend" % i)
 
-                    startline = glob.get_value(linenumname)
-                    endline = startline + lineblock-1
+                print(startline, endline)
 
-                    #print("startline = %d" % startline)
-                    #print("endline = %d" % endline)
+                data = self.datalines
+                print(data)
 
-                    if (endline > linelen):
-                        endline = linelen
+                data = data[int(startline):int(endline + 1)]
+                print(data)
 
-                    linenumname = "thread_%d_lineend" % i
-                    glob.set(linenumname, endline)
-
-                    linenumname = "thread_%d_linenum" % (i + 1)
-                    glob.set(linenumname, endline+1)
-
-                    #print('==================================')
-                else:
-                    startline = glob.get_value("thread_%d_linenum", i)
-                    endline = glob.get_value("thread_%d_lineend", i)
-
-                print("startline = %d" % startline)
-                print("endline = %d" % endline)
-
-                data = datalines[int(startline):int(endline+1)]
-                datalist.append(data)
-
-            glob.FFlag = 0
-
-
-            for i in range(glob.threadnum):
                 threadName = ("thread_%d" % i)
 
-                thread = mythread(threadName, threadLock, startline, bankinfo, self.returns, picpath, self.pictypevaluebak, self.URL, f_file, datalist[i])
+                thread = mythread(threadName, threadLock, startline, bankinfo, self.returns, picpath, self.pictypevaluebak, self.URL, f_file, data)
                 thread.start()
                 #threads.append(thread)
             '''
@@ -298,6 +261,9 @@ class Application_ui(Frame):
             glob.FFlag = 1
 
         else:
+            datalines = func.getBankInfo(self.dataPathVar)
+            print(datalines)
+
             print('linenum = %s' % (glob.linenum))
             datalines = datalines[glob.linenum:]
 
@@ -316,7 +282,8 @@ class Application(Application_ui):
         bankinfo = func.getbankStr()
         self.URL, self.dataPathVar, self.picpathVar = func.getset()
         glob._init()
-        glob.set("thread_0_linenum", 0)
+        glob.set("thread_0_linestart", 0)
+
         Application_ui.__init__(self, master)
 
 if __name__ == "__main__":

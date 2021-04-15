@@ -2,6 +2,9 @@ import ast
 import json
 import os
 import time
+
+import chardet
+
 from file import *
 import requests
 import base64
@@ -37,7 +40,7 @@ def getbankStr():#获取请求消息
     f = open(bankinfopath, "r")
     bankStr = f.readline()
     f.close()
-    print(bankStr)
+    #print(bankStr)
 
     if bankStr != '':
         #global bankinfo
@@ -86,6 +89,11 @@ def getset():
 def getBankInfo(dataPathVar):
     datafilepath = dataPathVar.get()
     print(datafilepath)
+
+    f = open(datafilepath, 'rb')
+    glob.encode = chardet.detect(f.read())['encoding']
+    print("glob.encode = " + glob.encode)
+    f.close()
 
     with open(datafilepath, mode='r', encoding='UTF-8') as datafile:
         datalines = datafile.read().splitlines()

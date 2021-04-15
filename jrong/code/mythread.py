@@ -73,7 +73,7 @@ class mythread(threading.Thread):
 
             reqjsonstr = json.dumps(reqjsodict, sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
 
-            info = "进程 %s 第%d条 内容:%s\n" % (self.threadName, (glob.get_value("%s_linenum" % self.threadName) + index + 1), line)
+            info = "进程 %s 第%d条 内容:%s\n" % (self.threadName, (glob.get_value("%s_linestart" % self.threadName) + index + 1), line)
             print(info)
 
             '''
@@ -116,4 +116,4 @@ class mythread(threading.Thread):
                 outinfo = "%s,%s" % (line, reqjsodict["resultCode"])
 
             self.f_file.w_file(outinfo + "\n")
-        glob.set("%s_linenum" % self.threadName, self.startline)
+        glob.set("%s_linestart" % self.threadName, self.startline)
