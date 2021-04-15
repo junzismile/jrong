@@ -1,6 +1,11 @@
 linenum = 0
 stopFlag = 0
 linecount = 0
+threadnum = 2
+index = 0
+FFlag = 1
+picpathVar = ""
+
 def _init():
     global _global_dict
     _global_dict = {}

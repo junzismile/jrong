@@ -7,6 +7,7 @@ import requests
 import base64
 from tkinter import *
 import glob
+import jrong
 
 def w_file(self, filename, line, type="w"):
     f = open(filename, type)
@@ -96,7 +97,7 @@ def getimg64(picpathVar, pictypevaluebak, imgName, bankinfo, returns):
     picpath = ""
     bankinfo['img64'] = ""
     picstr = ""
-    picpath = picpathVar.get() + '\\\\' + imgName
+    picpath = picpathVar + '\\\\' + imgName
 
     if (picpath != '' and str(bankinfo['opId']) == '9000'):
         if pictypevaluebak:
@@ -135,8 +136,7 @@ def getimg64(picpathVar, pictypevaluebak, imgName, bankinfo, returns):
                 returns.see("end")
                 return ""
 
-def sendInfo(bankinfo, dataPathVar, returns, picpathVar, pictypevaluebak, URL, f_file, datalines):#发送请求
-
+def sendInfo(bankinfo, returns, picpathVar, pictypevaluebak, URL, f_file, datalines):#发送请求
     #session = requests.Session()
     for index, line in enumerate(datalines):
         if glob.stopFlag == 1:
