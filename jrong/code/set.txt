@@ -1,1 +1,1 @@
-{'url': 'http://192.168.2.165:10002/cloud_interface1', 'datapath': 'E:\\\\python\\\\code\\\\jrongnew\\\\aa.txt', 'picpath': 'E:\\\\python\\\\code\\\\jrongnew'}
+{'url': 'http://192.168.2.165:10002/cloud_interface1', 'datapath': 'E:\\\\python\\\\gitcode\\\\jrong\\\\data\\\\aa.txt', 'picpath': 'E:\\\\python\\\\gitcode\\\\jrong\\\\data'}

@@ -106,6 +106,7 @@ def getimg64(picpathVar, pictypevaluebak, imgName, bankinfo, returns):
     bankinfo['img64'] = ""
     picstr = ""
     picpath = picpathVar + '\\\\' + imgName
+    print(picpath)
 
     if (picpath != '' and str(bankinfo['opId']) == '9000'):
         if pictypevaluebak:
@@ -114,16 +115,20 @@ def getimg64(picpathVar, pictypevaluebak, imgName, bankinfo, returns):
             except FileNotFoundError:
                 #self.returns.delete('1.0', 'end')
                 returns.insert(INSERT, '图片路径错误，请确认图片是否存在!!!\n\n')
+                print("图片路径错误，请确认图片是否存在!!!", picpath)
                 returns.see("end")
+
             try:
                 picstr = picfile.read()
             except UnicodeDecodeError:
                 #self.returns.delete('1.0', 'end')
                 returns.insert(INSERT, '传入的不是base64编码后的图片，请确认!!!\n\n')
+                print("传入的不是base64编码后的图片，请确认!!!", picpath)
                 returns.see("end")
                 return ""
             except UnboundLocalError:
                 returns.insert(INSERT, '传入的不是base64编码后的图片，请确认!!!\n\n')
+                print("传入的不是base64编码后的图片，请确认!!!", picpath)
                 returns.see("end")
                 return ""
 
@@ -143,6 +148,8 @@ def getimg64(picpathVar, pictypevaluebak, imgName, bankinfo, returns):
                 returns.insert(INSERT, '图片路径错误，请确认图片是否存在!!!\n\n')
                 returns.see("end")
                 return ""
+    else:
+        print("图片路径和opid为", picpath, str(bankinfo['opId']))
 
 def sendInfo(bankinfo, returns, picpathVar, pictypevaluebak, URL, f_file, datalines):#发送请求
     #session = requests.Session()

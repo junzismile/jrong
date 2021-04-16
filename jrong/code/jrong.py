@@ -38,7 +38,7 @@ class Application_ui(Frame):
         self.createWidgets()
 
         if glob.threadnum > 1:
-            self.datalines = self.thread_getdatalist()
+            self.thread_getdatalist()
 
     def createWidgets(self):
         self.top = self.winfo_toplevel()
@@ -49,6 +49,7 @@ class Application_ui(Frame):
         set = Menu(menubar, tearoff=0)
         set.add_command(label="修改url", command = self.changeUrl)
         set.add_command(label="修改消息体", command = self.changeMsgbody)
+        set.add_command(label="修改线程数", command=self.changethread)
         menubar.add_cascade(label="设置", menu=set)
         self.top.config(menu = menubar)
 
@@ -146,6 +147,17 @@ class Application_ui(Frame):
             #urlpath = resource_path("jrongurl.txt");
             #self.w_file(urlpath, self.URL)
 
+    def changethread(self):
+        threadnum= glob.threadnum
+        threadnum = tkinter.simpledialog.askstring(title = '设置程序线程数',prompt='请输入您要设置的线程数：                                   ',initialvalue = threadnum)
+        print(threadnum)
+
+        if threadnum != None:
+            glob.threadnum = int(threadnum)
+            print('glob.threadnum = ' + str(glob.threadnum))
+            #func.setset(self.URL, self.dataPathVar, self.picpathVar)
+            self.thread_getdatalist()
+
     def changeMsgbody(self):
         print('changeMsgBody')
         global  bankinfo
@@ -184,17 +196,19 @@ class Application_ui(Frame):
         self.dataPathVar.set(dataPathVar)
         func.setset(self.URL, self.dataPathVar, self.picpathVar)
 
+
     def thread_getdatalist(self):
         print("thread_getdatalist")
-        datalist = list()
+        #self.datalist = list()
+        self.datalines = list()
 
-        datalines = func.getBankInfo(self.dataPathVar)
-        print(datalines)
+        self.datalines = func.getBankInfo(self.dataPathVar)
+        print(self.datalines)
 
-        linelen = len(datalines)
-        lineblock = linelen / glob.threadnum
+        glob.filelen = len(self.datalines)
+        lineblock = glob.filelen / glob.threadnum
 
-        print('linelen = %d' % linelen)
+        print('glob.filelen = %d' % glob.filelen)
         print('lineblock = %d' % lineblock)
 
         if (glob.threadnum > 1):
@@ -204,8 +218,8 @@ class Application_ui(Frame):
                 startline = glob.get_value(linenumname)
                 endline = startline + lineblock - 1
 
-                if (endline > linelen):
-                    endline = linelen
+                if (endline > glob.filelen):
+                    endline = glob.filelen
 
                 linenumname = "thread_%d_lineend" % i
                 glob.set(linenumname, endline)
@@ -216,16 +230,17 @@ class Application_ui(Frame):
                 print("startline = %d" % startline)
                 print("endline = %d" % endline)
 
-                data = datalines[int(startline):int(endline + 1)]
-                datalist.append(data)
+                #data = datalines[int(startline):int(endline + 1)]
+                #self.datalines.append(data)
 
-        return  datalines
+        #self.datalines =  datalines
 
     def sendBankInfo(self):
         print('sendBankInfo')
         start = time.time()
 
-        #glob.stopFlag = 0
+        glob.stopFlag = 0
+        threads = list()
         f_file = file("./out.txt", "a+", encoding=glob.encode)
         picpath = self.picpathVar.get()
 
@@ -243,22 +258,22 @@ class Application_ui(Frame):
                 print(data)
 
                 data = data[int(startline):int(endline + 1)]
-                print(data)
+                #print(data)
+
+                if startline == 0:
+                    self.returns.delete('1.0', 'end')
 
                 threadName = ("thread_%d" % i)
 
                 thread = mythread(threadName, threadLock, startline, bankinfo, self.returns, picpath, self.pictypevaluebak, self.URL, f_file, data)
                 thread.start()
+                time.sleep(0.01)
                 #threads.append(thread)
-            '''
-            glob.FFlag = 0
 
+            '''
             for thread in threads:
                 thread.join()
             '''
-
-
-            glob.FFlag = 1
 
         else:
             datalines = func.getBankInfo(self.dataPathVar)
